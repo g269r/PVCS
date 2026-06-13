@@ -235,6 +235,52 @@ async function renderSettingsPage() {
     showToast('Settings saved', 'success');
   });
 
+  // ── AI settings ──
+  function refreshAISettingsStatus() {
+    const badge   = document.getElementById('ai-settings-status');
+    const runtime = document.getElementById('ai-settings-runtime-status');
+    const unloadBtn = document.getElementById('btn-unload-ai-settings');
+    if (!badge) return;
+    const map = {
+      idle:     { text:'Not Loaded',      cls:'badge-normal'    },
+      loading:  { text:`Loading ${AI.loadProgress}%`, cls:'badge-important' },
+      ready:    { text:'Model Ready ✅',   cls:'badge-success'   },
+      error:    { text:'Load Error',       cls:'badge-urgent'    },
+      fallback: { text:'Not Available',   cls:'badge-normal'    },
+    };
+    const cfg = map[AI.status] || map.idle;
+    badge.textContent = cfg.text;
+    badge.className   = `badge ${cfg.cls}`;
+    if (runtime) runtime.textContent = AI.modelId ? `Loaded: ${AI.modelId}` : '';
+    if (unloadBtn) unloadBtn.style.display = AI.status === 'ready' ? '' : 'none';
+  }
+
+  AI.onStatusChange(refreshAISettingsStatus);
+  refreshAISettingsStatus();
+
+  document.getElementById('btn-save-ai-settings')?.addEventListener('click', async () => {
+    await Promise.all([
+      Settings.set('aiModel',       document.getElementById('s-ai-model').value),
+      Settings.set('aiTemperature', document.getElementById('s-ai-temperature').value),
+      Settings.set('aiMaxTokens',   document.getElementById('s-ai-max-tokens').value),
+      Settings.set('aiDraftStyle',  document.getElementById('s-ai-draft-style').value),
+    ]);
+    showToast('AI settings saved', 'success');
+  });
+
+  document.getElementById('btn-test-load-ai')?.addEventListener('click', async () => {
+    const modelId = document.getElementById('s-ai-model').value;
+    showToast(`Loading model: ${modelId.split('-').slice(0,3).join('-')}…`, 'info', 3000);
+    await initAI(modelId);
+    refreshAISettingsStatus();
+  });
+
+  document.getElementById('btn-unload-ai-settings')?.addEventListener('click', async () => {
+    await unloadAIModel();
+    refreshAISettingsStatus();
+    showToast('Model unloaded', 'info');
+  });
+
   // ── Recipient tabs ──
   document.querySelectorAll('.rec-tab').forEach(btn => {
     btn.addEventListener('click', () => {
