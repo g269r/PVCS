@@ -872,3 +872,96 @@ tr:hover td { background: rgba(26,58,92,0.03); }
   letter-spacing: 0.5px;
   font-weight: 700;
 }
+
+/* ============================================================
+   AI Drafter – WebLLM UI Components
+   ============================================================ */
+
+/* ---- Topbar AI badge ---- */
+.ai-status-badge {
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.3s, color 0.3s;
+}
+.ai-idle     { background: #f0f4f8; color: #5a6a7a; }
+.ai-loading  { background: #fff3cd; color: #856404; animation: pulse 1.2s infinite; }
+.ai-ready    { background: #d4edda; color: #155724; }
+.ai-error    { background: #fde8e8; color: #c0392b; }
+.ai-fallback { background: #f0f4f8; color: #5a6a7a; }
+
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+
+/* ---- AI Banner on Create Letter page ---- */
+.ai-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  border: 1.5px solid var(--border);
+  flex-wrap: wrap;
+  gap: 12px;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.ai-banner-left { display: flex; align-items: center; gap: 12px; }
+.ai-banner-left > span { font-size: 1.6rem; line-height: 1; }
+
+.ai-banner-idle    { background: #f8f9fa; border-color: var(--border); }
+.ai-banner-loading { background: #fff8e1; border-color: #f0c040; }
+.ai-banner-ready   { background: #f0fdf4; border-color: #4caf50; }
+.ai-banner-error   { background: #fff0f0; border-color: #e57373; }
+.ai-banner-fallback{ background: #f8f9fa; border-color: var(--border); }
+
+/* ---- Badge variants ---- */
+.badge-success { background: #d4edda; color: #155724; }
+.badge-ai      { background: #e8f4fd; color: #1a6fa3; }
+
+/* ---- Generating indicator ---- */
+#ai-generating-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* ---- Draft stream status bar ---- */
+#draft-stream-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: linear-gradient(90deg, #f0f7ff, #e8f4fd);
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 var(--radius) var(--radius);
+  font-size: 0.82rem;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* ---- AI draft card highlight when active ---- */
+#ai-draft-card { border-top: 3px solid var(--primary); }
+
+/* ---- Improve button glow when AI ready ---- */
+.ai-ready-glow {
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.35);
+}
+
+/* ---- Settings AI section ---- */
+#ai-settings-card { border-top: 3px solid var(--info); }
+
+#s-ai-temperature {
+  accent-color: var(--primary);
+}
+
+/* ---- Disabled state during generation ---- */
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

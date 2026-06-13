@@ -20,6 +20,7 @@ const APP_ASSETS = [
   './js/pdf-export.js',
   './js/docx-export.js',
   './js/bylaws.js',
+  './js/ai-drafter.js',
   './js/app.js',
   './js/sw-register.js',
   './js/pages/dashboard.js',
