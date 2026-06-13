@@ -193,8 +193,9 @@ async function renderSettingsPage() {
               ${WEBLLM_MODELS.map(m => `
                 <tr>
                   <td>
-                    <div style="font-weight:600;font-size:0.85rem">${m.label.split('(')[0].trim()}</div>
-                    <div style="font-size:0.75rem;color:var(--text-muted)">${m.id}</div>
+                    <div style="font-weight:600;font-size:0.85rem">${escHtml(m.label)}</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted)">${escHtml(m.desc || '')}</div>
+                    <div style="font-size:0.72rem;color:var(--text-muted);font-family:monospace">${escHtml(m.id)}</div>
                   </td>
                   <td><span class="badge badge-normal">${m.size}</span></td>
                   <td>${m.speed}</td>
