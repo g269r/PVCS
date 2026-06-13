@@ -235,21 +235,4 @@ async function runIntegrityCheck() {
   }
 }
 
-// Expose STORES for clearing
-const STORES = {
-  LETTERS: 'letters',
-  BYLAWS_PAGES: 'bylaws_pages',
-  COUNTERS: 'counters',
-  SETTINGS: 'settings',
-  RECIPIENTS: 'recipients',
-};
-
-async function dbClear(store) {
-  await openDB();
-  return new Promise((res, rej) => {
-    const tx = db.transaction(store, 'readwrite');
-    const req = tx.objectStore(store).clear();
-    req.onsuccess = () => res();
-    req.onerror = () => rej(req.error);
-  });
-}
+// STORES and dbClear are defined in db.js
