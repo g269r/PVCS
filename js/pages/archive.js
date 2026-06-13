@@ -290,6 +290,10 @@ async function editLetter(did) {
   if (!letter) { showToast('Letter not found', 'error'); return; }
   Object.assign(createLetterState, {
     ...letter,
+    // map structured fields (handle old letters that only have flat recipient)
+    recipientDesignation:  letter.recipientDesignation  || letter.recipient || '',
+    recipientOrganization: letter.recipientOrganization || '',
+    recipientLocation:     letter.recipientLocation     || '',
     editingDID: did,
     createdAt: letter.createdAt,
   });
