@@ -102,73 +102,14 @@ const TYPE_CODE_MAP = {
   'Custom': 'CST',
 };
 
-// ---- Recipient slug ----
+// ---- Recipient slug (legacy – kept for archive display only) ----
+// New code uses RecipientMaster.buildRefSegment() from recipients.js
 function recipientSlug(name) {
-  return name
+  return (name || '')
     .toUpperCase()
     .replace(/[^A-Z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 16);
-}
-
-// ---- Searchable dropdown ----
-function buildSearchableDropdown(container, items, placeholder, onSelect, initialValue) {
-  container.innerHTML = `
-    <div class="searchable-dropdown" style="position:relative;">
-      <input type="text" class="form-control sd-input" placeholder="${placeholder}" autocomplete="off" value="${escHtml(initialValue || '')}" />
-      <div class="sd-list" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-top:none;border-radius:0 0 6px 6px;max-height:220px;overflow-y:auto;z-index:50;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
-      </div>
-    </div>`;
-
-  const input = container.querySelector('.sd-input');
-  const list = container.querySelector('.sd-list');
-  let selected = initialValue || '';
-
-  function renderList(filter) {
-    const filtered = items.filter(i => i.toLowerCase().includes(filter.toLowerCase()));
-    list.innerHTML = filtered.length
-      ? filtered.map(i => `<div class="sd-item" style="padding:9px 14px;cursor:pointer;font-size:0.88rem;border-bottom:1px solid var(--border);">${escHtml(i)}</div>`).join('')
-        + `<div class="sd-item sd-custom" style="padding:9px 14px;cursor:pointer;font-size:0.82rem;color:var(--primary);border-top:1px solid var(--border);">+ Add: "${escHtml(filter || 'Custom')}"</div>`
-      : `<div style="padding:10px 14px;font-size:0.82rem;color:var(--text-muted);">No match – press Enter to add custom</div>
-         <div class="sd-item sd-custom" style="padding:9px 14px;cursor:pointer;font-size:0.82rem;color:var(--primary);">+ Add: "${escHtml(filter || 'Custom')}"</div>`;
-    list.style.display = 'block';
-  }
-
-  input.addEventListener('focus', () => renderList(input.value));
-  input.addEventListener('input', () => renderList(input.value));
-
-  list.addEventListener('mousedown', (e) => {
-    e.preventDefault();
-    const item = e.target.closest('.sd-item');
-    if (!item) return;
-    if (item.classList.contains('sd-custom')) {
-      selected = input.value.trim() || 'Custom';
-      input.value = selected;
-    } else {
-      selected = item.textContent;
-      input.value = selected;
-    }
-    list.style.display = 'none';
-    onSelect(selected);
-    if (item.classList.contains('sd-custom') && selected !== 'Custom') {
-      Recipients.add(selected);
-    }
-  });
-
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      selected = input.value.trim();
-      if (selected) { onSelect(selected); list.style.display = 'none'; }
-    }
-    if (e.key === 'Escape') { list.style.display = 'none'; }
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!container.contains(e.target)) list.style.display = 'none';
-  });
-
-  return { getValue: () => input.value.trim() };
 }
 
 // ---- Confirm dialog ----
