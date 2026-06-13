@@ -10,6 +10,7 @@ const CDN_CACHE = 'pvcs-cdn-v1';
 const APP_ASSETS = [
   './',
   './index.html',
+  './tools/generate-bylaws-pdf.html',
   './css/style.css',
   './js/db.js',
   './js/utils.js',

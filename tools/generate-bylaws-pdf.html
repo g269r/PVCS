@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Generate Model Bylaws PDF – PVCS</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; padding: 30px; max-width: 700px; margin: 0 auto; background: #f5f6f8; color: #1a1a2e; }
+  h1 { color: #1a3a5c; }
+  .btn { background: #1a3a5c; color: #fff; padding: 14px 28px; border: none; border-radius: 6px; font-size: 1.1rem; cursor: pointer; margin-top: 20px; }
+  .btn:hover { background: #2a5a8c; }
+  .status { margin-top: 16px; padding: 12px; border-radius: 6px; font-size: 0.9rem; }
+  .info { background: #e8f4fd; color: #1a6fa3; }
+  .success { background: #e8f7ed; color: #1e7e34; }
+  .progress { background: #fff3cd; color: #856404; }
+  .note { background: #fff8e1; padding: 14px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 20px; border-left: 4px solid #c8a84b; }
+</style>
+</head>
+<body>
+<h1>🌿 PVCS Model Bylaws PDF Generator</h1>
+<div class="note">
+  <strong>Instructions:</strong><br>
+  Click the button below to generate the official Model Bylaws PDF for<br>
+  <strong>Patna Sadar Block Primary Vegetables Growers Cooperative Society Limited</strong>.<br><br>
+  The PDF will be downloaded automatically. Then upload it via the <strong>Bylaw Search</strong> page
+  in the PVCS DMS application to enable full-text search.
+</div>
+<button class="btn" onclick="generatePDF()">📄 Generate & Download Model Bylaws PDF</button>
+<div id="status" class="status info">Ready to generate. Click the button above.</div>
+
+<script>
+async function generatePDF() {
+  const statusEl = document.getElementById('status');
+  statusEl.className = 'status progress';
+  statusEl.textContent = 'Generating PDF... please wait.';
+
+  const { PDFDocument, rgb, StandardFonts, degrees } = PDFLib;
+
+  const navy   = rgb(0.1, 0.227, 0.361);
+  const gold   = rgb(0.784, 0.659, 0.294);
+  const black  = rgb(0, 0, 0);
+  const gray   = rgb(0.42, 0.46, 0.50);
+  const white  = rgb(1, 1, 1);
+  const maroon = rgb(0.48, 0.08, 0.08);
+  const light  = rgb(0.96, 0.97, 0.98);
+
+  const pdfDoc = await PDFDocument.create();
+  pdfDoc.setTitle('Model Bye-Laws – PVCS Patna Sadar');
+  pdfDoc.setAuthor('Patna Sadar Block Primary Vegetables Growers Cooperative Society Limited');
+  pdfDoc.setSubject('Model Bye-Laws under Bihar Cooperative Societies Act, 1935');
+  pdfDoc.setKeywords(['bylaws','cooperative','PVCS','Patna','vegetable','Bihar']);
+  pdfDoc.setCreationDate(new Date());
+
+  const font       = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fontBold   = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const fontObliq  = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+
+  const W = 595.28, H = 841.89; // A4
+  const ML = 55, MR = 55, MT = 50, MB = 50;
+  const CW = W - ML - MR;
+
+  let currentPage = null;
+  let y = 0;
+  let pageNum = 0;
+  const totalSections = 57; // approx
+
+  function newPage() {
+    pageNum++;
+    const page = pdfDoc.addPage([W, H]);
+
+    // Header bar
+    page.drawRectangle({ x:0, y:H-62, width:W, height:62, color:navy });
+    page.drawRectangle({ x:0, y:H-67, width:W, height:5, color:gold });
+
+    // Header text
+    page.drawText('PATNA SADAR BLOCK PRIMARY VEGETABLES GROWERS COOPERATIVE SOCIETY LIMITED', {
+      x:ML, y:H-30, size:7.8, font:fontBold, color:white
+    });
+    page.drawText('पटना सदर प्रखंड प्राथमिक सब्जी उत्पादक सहकारी समिति लिमिटेड', {
+      x:ML, y:H-43, size:8, font:fontBold, color:gold
+    });
+    page.drawText('Reg. No.: 26/HQR/2018  |  E-8, Chitrakut Vihar Colony, Bhagwat Nagar, Patna Sadar, Patna – 800026', {
+      x:ML, y:H-55, size:6.5, font, color:rgb(0.7,0.8,0.9)
+    });
+
+    // Footer
+    page.drawLine({ start:{x:ML,y:MB+18}, end:{x:W-MR,y:MB+18}, thickness:0.4, color:gray, opacity:0.4 });
+    page.drawText('MODEL BYE-LAWS – Bihar Cooperative Societies Act (Act 6 of 1935)', {
+      x:ML, y:MB+6, size:6.5, font, color:gray
+    });
+    const pgTxt = `Page ${pageNum}`;
+    const pgW = font.widthOfTextAtSize(pgTxt, 7);
+    page.drawText(pgTxt, { x:W-MR-pgW, y:MB+6, size:7, font, color:gray });
+
+    currentPage = page;
+    y = H - 85;
+    return page;
+  }
+
+  function checkY(needed) {
+    if (y < MB + 30 + needed) newPage();
+  }
+
+  function drawText(text, opts={}) {
+    const {
+      size=9, f=font, color=black, indent=0, bold=false,
+      center=false, lineHeight=1.55, maxWidth=CW
+    } = opts;
+    const usedFont = bold ? fontBold : f;
+    const words = String(text||'').split(' ');
+    let line = '';
+    const lh = size * lineHeight;
+
+    checkY(lh * 2);
+
+    for (const word of words) {
+      const test = line ? line+' '+word : word;
+      if (usedFont.widthOfTextAtSize(test, size) > (maxWidth - indent) && line) {
+        checkY(lh);
+        const xPos = center ? (ML + (maxWidth - usedFont.widthOfTextAtSize(line, size))/2) : ML+indent;
+        currentPage.drawText(line, { x:xPos, y, size, font:usedFont, color });
+        y -= lh;
+        line = word;
+      } else { line = test; }
+    }
+    if (line) {
+      checkY(lh);
+      const xPos = center ? (ML + (maxWidth - usedFont.widthOfTextAtSize(line, size))/2) : ML+indent;
+      currentPage.drawText(line, { x:xPos, y, size, font:usedFont, color });
+      y -= lh;
+    }
+  }
+
+  function drawHeading(text, level=1) {
+    const cfg = {
+      1: { size:13, color:navy,  bgColor:light, padV:6, bold:true, marginT:14, marginB:6 },
+      2: { size:10.5, color:navy,  bgColor:null,  padV:0, bold:true, marginT:10, marginB:4 },
+      3: { size:9.5, color:maroon, bgColor:null,  padV:0, bold:true, marginT:8,  marginB:3 },
+    }[level] || { size:9, color:black, bold:true, marginT:6, marginB:2 };
+
+    y -= cfg.marginT;
+    checkY((cfg.size * 1.6) + cfg.padV * 2 + 6);
+
+    if (cfg.bgColor) {
+      currentPage.drawRectangle({ x:ML-4, y:y-cfg.padV, width:CW+8, height:cfg.size*1.5+cfg.padV*2, color:cfg.bgColor });
+      currentPage.drawLine({ start:{x:ML-4,y:y-cfg.padV}, end:{x:ML-4,y:y+cfg.size*1.5+cfg.padV}, thickness:3, color:gold });
+    }
+
+    currentPage.drawText(text, { x:ML, y, size:cfg.size, font:fontBold, color:cfg.color });
+    y -= cfg.size * 1.55 + cfg.marginB;
+  }
+
+  function space(n=1) { y -= 5 * n; }
+
+  function drawRule(color=gray) {
+    space(0.5);
+    checkY(4);
+    currentPage.drawLine({ start:{x:ML,y}, end:{x:W-MR,y}, thickness:0.4, color, opacity:0.35 });
+    space(1);
+  }
+
+  function drawBullet(text, opts={}) {
+    const { indent=12, bullet='•', size=9 } = opts;
+    const bulletW = font.widthOfTextAtSize(bullet+' ', size);
+    checkY(size * 1.6);
+    currentPage.drawText(bullet, { x:ML+indent, y, size, font:fontBold, color:navy });
+    drawText(text, { size, indent: indent + bulletW + 2 });
+  }
+
+  function drawNumbered(n, text, opts={}) {
+    const { indent=12, size=9 } = opts;
+    const label = `${n}.`;
+    const labelW = fontBold.widthOfTextAtSize(label+' ', size) + 4;
+    checkY(size * 1.6);
+    currentPage.drawText(label, { x:ML+indent, y, size, font:fontBold, color:navy });
+    drawText(text, { size, indent: indent + labelW });
+  }
+
+  function drawSubBullet(prefix, text, opts={}) {
+    const { indent=20, size=9 } = opts;
+    const labelW = fontBold.widthOfTextAtSize(prefix+' ', size) + 4;
+    checkY(size * 1.6);
+    currentPage.drawText(prefix, { x:ML+indent, y, size, font:fontBold, color:maroon });
+    drawText(text, { size, indent: indent + labelW });
+  }
+
+  // ===================== COVER PAGE =====================
+  newPage();
+
+  // Cover decorative block
+  currentPage.drawRectangle({ x:ML-10, y:H-200, width:CW+20, height:130, color:navy });
+  currentPage.drawRectangle({ x:ML-10, y:H-205, width:CW+20, height:5, color:gold });
+
+  currentPage.drawText('आदर्श उपविधियाँ', {
+    x:ML, y:H-130, size:22, font:fontBold, color:gold
+  });
+  currentPage.drawText('MODEL BYE-LAWS', {
+    x:ML, y:H-158, size:18, font:fontBold, color:white
+  });
+
+  y = H - 240;
+  drawHeading('PATNA SADAR BLOCK PRIMARY VEGETABLES GROWERS', 1);
+  drawHeading('COOPERATIVE SOCIETY LIMITED', 1);
+  space(1);
+
+  drawText('पटना सदर प्रखंड प्राथमिक सब्जी उत्पादक सहकारी समिति लिमिटेड', {
+    size:10, bold:true, color:navy, center:true
+  });
+  space(2);
+  drawRule(gold);
+  space(1);
+
+  const coverInfo = [
+    ['Registration Number', '26/HQR/2018'],
+    ['Registered Office', 'E-8, Chitrakut Vihar Colony, Bhagwat Nagar, P.O. Bahadurpur Colony, Patna Sadar, Patna District, Bihar – 800026'],
+    ['Act', 'Bihar Cooperative Societies Act, 1935 (Act 6 of 1935)'],
+    ['Area of Operation', 'Patna Sadar Block, Patna District, Bihar'],
+    ['Share Capital', '₹3,00,000 (Three Lakh) at ₹100 per share'],
+    ['Managing Committee', '13 Members | Tenure: 5 Years'],
+    ['Financial Year', '1st April to 31st March'],
+  ];
+
+  for (const [label, value] of coverInfo) {
+    checkY(28);
+    currentPage.drawRectangle({ x:ML, y:y-4, width:CW, height:18, color:light });
+    currentPage.drawText(label+':', { x:ML+6, y, size:8.5, font:fontBold, color:navy });
+    const lw = fontBold.widthOfTextAtSize(label+':', 8.5) + 10;
+    drawText(value, { size:8.5, indent:lw, maxWidth:CW-10 });
+    y -= 4;
+  }
+
+  space(3);
+  drawRule(gold);
+  space(1);
+  currentPage.drawText('Prepared under: Bihar Cooperative Societies Act, 1935 | Effective from Registration Date', {
+    x:ML, y, size:7.5, font:fontObliq, color:gray
+  });
+  y -= 12;
+  currentPage.drawText('This document is the official Model Bye-Laws of the society adopted at formation.', {
+    x:ML, y, size:7.5, font:fontObliq, color:gray
+  });
+
+  // ===================== PAGE 2+ CONTENT =====================
+  newPage();
+  currentPage.drawText('TABLE OF CONTENTS', { x:ML, y, size:11, font:fontBold, color:navy });
+  y -= 16;
+  drawRule();
+
+  const toc = [
+    ['1', 'Name and Address'],
+    ['2', 'Objectives'],
+    ['3', 'Area of Operation'],
+    ['4 – 5', 'Membership'],
+    ['6', 'Declaration Required Before Admission'],
+    ['7', 'Duty to Furnish Correct Information'],
+    ['8', 'Rights of Members'],
+    ['9', 'Nomination'],
+    ['10', 'Withdrawal from Membership'],
+    ['11', 'Expulsion from Membership'],
+    ['12', 'Termination of Membership'],
+    ['13', 'Funds of the Society'],
+    ['14', 'Borrowing Limit'],
+    ['15', 'Custody of Funds'],
+    ['16', 'Investment of Funds'],
+    ['17', 'Share Capital'],
+    ['18', 'Consequences of Default in Share Instalments'],
+    ['19', 'Restriction on Extension of Time'],
+    ['20', 'Share Certificate'],
+    ['21', 'Transfer and Refund of Shares'],
+    ['22', 'Liability'],
+    ['23 – 26', 'General Body (AGM, EGM, SGM, Quorum, Voting, Notice)'],
+    ['24', 'Minutes of General Meetings'],
+    ['25 – 33', 'Managing Committee (Constitution, Powers, Duties)'],
+    ['34 – 37', 'Office Bearers (President, Vice-President, Secretary, Manager)'],
+    ['38 – 43', 'Loan Operations'],
+    ['44 – 46', 'Sale of Vegetable Produce'],
+    ['47 – 48', 'Accounts and Records'],
+    ['49 – 50', 'Distribution of Profits and Reserve Fund'],
+    ['51', 'Audit'],
+    ['52', 'Inspection and Inquiry'],
+    ['53', 'Annual Returns'],
+    ['54', 'Amendment of Bye-Laws'],
+    ['55', 'Interpretation'],
+    ['56', 'Settlement of Disputes'],
+    ['57', 'Dissolution and Liquidation'],
+  ];
+
+  for (const [num, title] of toc) {
+    checkY(14);
+    currentPage.drawText(num, { x:ML, y, size:8.5, font:fontBold, color:navy });
+    currentPage.drawText(title, { x:ML+40, y, size:8.5, font, color:black });
+    y -= 13;
+  }
+
+  // ===================== BYE-LAWS CONTENT =====================
+
+  // Helper: numbered sub item with (a), (b) etc.
+  function drawAlpha(alpha, text, opts={}) {
+    drawSubBullet(`(${alpha})`, text, { indent:20, ...opts });
+  }
+
+  newPage();
+  drawHeading('BYE-LAWS', 1);
+  drawText('These bye-laws are adopted under the Bihar Cooperative Societies Act, 1935 (Act 6 of 1935) and shall govern the constitution, management, and operations of the society.', { size:8.5, color:gray });
+  space(2);
+
+  // RULE 1
+  drawHeading('Rule 1 – Name and Address', 2);
+  drawText('This society, registered under Section 6 of the Bihar Cooperative Societies Act, 1935, shall be known as:', { size:9 });
+  space(0.5);
+  drawText('PATNA SADAR BLOCK PRIMARY VEGETABLES GROWERS COOPERATIVE SOCIETY LIMITED', { size:10, bold:true, color:navy });
+  drawText('पटना सदर प्रखंड प्राथमिक सब्जी उत्पादक सहकारी समिति लिमिटेड', { size:9.5, bold:true, color:maroon });
+  space(0.5);
+  drawText('Its registered office shall be situated at:', { size:9 });
+  drawBullet('E-8, Chitrakut Vihar Colony, Bhagwat Nagar, P.O. Bahadurpur Colony', { size:9 });
+  drawBullet('Patna Sadar, Patna District, Bihar – 800026', { size:9 });
+  space(0.5);
+  drawText('If any change is made in the registered address, information shall be given within 15 days to:', { size:9 });
+  drawBullet('The Registrar of Cooperative Societies', { size:9 });
+  drawBullet('The affiliated Federation', { size:9 });
+  drawBullet('The Financing Bank', { size:9 });
+  drawRule();
+
+  // RULE 2
+  drawHeading('Rule 2 – Objectives', 2);
+  drawText('The objective of this society shall be to improve the social and economic condition of its members. In particular:', { size:9 });
+  space(0.5);
+  drawNumbered(1, 'Develop among members the spirit of self-reliance, mutual help, thrift and cooperation.', { size:9 });
+  drawNumbered(2, 'Arrange for the sale of vegetables produced by members at the highest possible profit.', { size:9 });
+  drawNumbered(3, 'Act as agent for members and, where a Vegetable Growers Union exists, obtain contracts and arrange delivery of vegetables at fixed rates and proper times.', { size:9 });
+  drawNumbered(4, 'Arrange transportation of members\' vegetable produce from one place to another.', { size:9 });
+  drawNumbered(5, 'Act as purchasing agent for members in obtaining quality seeds, fertilizers, agricultural implements and other farming necessities.', { size:9 });
+  drawNumbered(6, 'Receive payment for vegetables sold by members through the Union and arrange prompt distribution among members.', { size:9 });
+  drawNumbered(7, 'Promote among members modern methods of vegetable cultivation recommended by the Agriculture Department.', { size:9 });
+  drawNumbered(8, 'Arrange loans for cultivation, purchase of seeds and implements, and for processing, storage and marketing of produce.', { size:9 });
+  drawNumbered(9, 'Undertake all such activities that help fulfil the above objectives.', { size:9 });
+  drawRule();
+
+  // RULE 3
+  drawHeading('Rule 3 – Area of Operation', 2);
+  drawText('The area of operation of the society shall be limited to:', { size:9 });
+  drawText('Patna Sadar Block, Patna District, Bihar.', { size:9.5, bold:true, color:navy });
+  drawRule();
+
+  // RULES 4-5
+  drawHeading('Rules 4 & 5 – Membership', 2);
+  drawText('Any person may become a member provided he/she:', { size:9 });
+  drawBullet('Is of good conduct', { size:9 });
+  drawBullet('Is of sound mind', { size:9 });
+  drawBullet('Has completed 18 years of age', { size:9 });
+  drawBullet('Resides within the area of operation of the society', { size:9 });
+  drawBullet('Is a vegetable grower or engaged in related agricultural activities', { size:9 });
+  drawBullet('Fulfils the qualifications prescribed under the Act and Rules', { size:9 });
+  space(1);
+  drawText('The following persons shall be members of the society:', { size:9, bold:true });
+  drawAlpha('a', 'Persons who signed the application for registration and whose names were entered at the time of registration.');
+  drawAlpha('b', 'Persons subsequently admitted as members by the Managing Committee.');
+  space(0.5);
+  drawText('Every applicant shall submit a prescribed form to the Managing Committee. The Committee may approve or reject the application. In case of rejection, the applicant has the right to appeal before the General Body.', { size:9 });
+  drawRule();
+
+  // RULE 6
+  drawHeading('Rule 6 – Declaration Required Before Admission', 2);
+  drawText('Before becoming a member, every applicant shall sign a declaration stating:', { size:9 });
+  drawBullet('He shall abide by the existing bye-laws of the society.', { size:9 });
+  drawBullet('He shall observe any future rules framed by the Managing Committee with the approval of the General Body.', { size:9 });
+  space(0.5);
+  drawText('If any member refuses to sign within one month from the date of registration, he may be fined up to ₹500 or expelled from membership.', { size:9 });
+  drawRule();
+
+  // RULE 7
+  drawHeading('Rule 7 – Duty to Furnish Correct Information', 2);
+  drawText('Every member shall provide complete and accurate information regarding assets, liabilities, and financial position whenever required. Concealment or false information for obtaining a loan may result in a fine up to ₹500 or removal from membership.', { size:9 });
+  drawRule();
+
+  // RULE 8
+  drawHeading('Rule 8 – Rights of Members', 2);
+  drawNumbered(1, 'A member shall be entitled to exercise voting rights in Board elections only after fulfilling all conditions prescribed under the Act, Rules, and Bye-laws, including attendance requirements.', { size:9 });
+  drawNumbered(2, 'Every member shall have access, in the normal course of business, to notices, information, accounts, and records of the society.', { size:9 });
+  drawNumbered(3, 'Every member has the right to obtain information and copies of records relating to affairs, transactions, accounts, and financial statements through the CEO/Manager.', { size:9 });
+  drawNumbered(4, 'Members shall have the right to receive cooperative education, training in cooperative principles, and other educational facilities as provided under the Act, Rules, and Bye-laws.', { size:9 });
+  drawRule();
+
+  // RULE 9
+  drawHeading('Rule 9 – Nomination', 2);
+  drawText('Any member may nominate in writing any person (other than a society employee or officer) to receive his interest in the society upon his death. Such nomination shall be registered with the society.', { size:9 });
+  drawRule();
+
+  // RULE 10
+  drawHeading('Rule 10 – Withdrawal from Membership', 2);
+  drawText('A member who has no outstanding loan and who has been a member for at least one year may withdraw from membership by giving one month\'s written notice to the Managing Committee. However, withdrawal does not relieve the member of liabilities already incurred under existing declarations and undertakings.', { size:9 });
+  drawRule();
+
+  // RULE 11
+  drawHeading('Rule 11 – Expulsion from Membership', 2);
+  drawText('After conducting an open inquiry, the Managing Committee may suspend or expel a member for:', { size:9 });
+  drawAlpha('a', 'Serious violation of the bye-laws of the society.');
+  drawAlpha('b', 'Failure to repay a loan even after proper notice has been given.');
+  drawAlpha('c', 'Engaging in conduct that may weaken the financial condition of the society or bring disrepute to it.');
+  space(0.5);
+  drawText('An expelled member may appeal before the General Body within three months from the date of receiving the expulsion order. The appeal shall be placed before the next General Body Meeting.', { size:9 });
+  drawRule();
+
+  // RULE 12
+  drawHeading('Rule 12 – Termination of Membership', 2);
+  drawText('Membership shall cease for the following reasons:', { size:9 });
+  drawNumbered(1, 'If the member ceases to hold even one share of the society.', { size:9 });
+  drawNumbered(2, 'If the member shifts residence outside the area of operation and thereby loses eligibility.', { size:9 });
+  drawNumbered(3, 'If the member resigns after giving one month\'s notice in accordance with Rule 10.', { size:9 });
+  drawNumbered(4, 'If the member is removed under Rule 11.', { size:9 });
+  drawNumbered(5, 'Upon the death of the member.', { size:9 });
+  drawNumbered(6, 'If the member is declared insolvent by a competent court.', { size:9 });
+  drawRule();
+
+  // RULE 13
+  drawHeading('Rule 13 – Funds of the Society', 2);
+  drawText('The funds of the society may be raised from the following sources:', { size:9 });
+  drawAlpha('a', 'Share Capital.');
+  drawAlpha('b', 'Loans and deposits obtained from financing banks and Registrar under prescribed conditions.');
+  drawAlpha('c', 'Financial assistance, grants, or donations from the Government or other sources.');
+  drawAlpha('d', 'Reserve Fund and other funds.');
+  drawAlpha('e', 'Special voluntary contributions from members in the form of cash, materials, or labour.');
+  drawRule();
+
+  // RULE 14
+  drawHeading('Rule 14 – Borrowing Limit', 2);
+  drawText('The total amount of loans and deposits obtained shall not exceed ten (10) times the total of its paid-up share capital and reserve fund. This limit may be increased with the approval of the Registrar or competent cooperative authority.', { size:9 });
+  drawRule();
+
+  // RULE 15
+  drawHeading('Rule 15 – Custody of Funds', 2);
+  drawText('Subject to directions of the Registrar and Cooperative Department, the funds of the society shall remain in the custody of the Treasurer elected by the General Body and managed according to rules prescribed by the Managing Committee.', { size:9 });
+  drawRule();
+
+  // RULE 16
+  drawHeading('Rule 16 – Investment of Funds', 2);
+  drawText('Funds not immediately required for business purposes may be invested or deposited as follows:', { size:9 });
+  drawAlpha('a', 'In the Postal Savings Bank or Central Cooperative Bank.');
+  drawAlpha('b', 'In any approved scheduled bank.');
+  drawAlpha('c', 'In any Cooperative Bank or shares of another Cooperative Society, with prior approval of the General Body.');
+  drawAlpha('d', 'In any other form approved by the Registrar of Cooperative Societies.');
+  drawAlpha('e', 'In investments specifically described in Section 20 of the Indian Trust Act.');
+  drawRule();
+
+  // RULE 17
+  drawHeading('Rule 17 – Share Capital', 2);
+  drawText('The share capital of the society shall be ₹3,00,000 (Rupees Three Lakh only).', { size:9, bold:true });
+  space(0.5);
+  drawBullet('Face value of one share: ₹100 (One Hundred Rupees)', { size:9 });
+  drawBullet('Members shall pay value of shares in one lump sum or in instalments as determined by the Managing Committee.', { size:9 });
+  drawBullet('The Managing Committee may extend the time for payment of instalments.', { size:9 });
+  drawBullet('No member shall hold more than one-fifth (1/5th) of the shares available for sale.', { size:9 });
+  drawRule();
+
+  // RULE 18
+  drawHeading('Rule 18 – Consequences of Default in Share Instalments', 2);
+  drawText('Members who have not paid their share instalments shall:', { size:9 });
+  drawAlpha('a', 'Not be entitled to vote in General Body or Managing Committee Meetings.');
+  drawAlpha('b', 'Not be eligible for loans from the society.');
+  drawAlpha('c', 'Not participate in purchase and sale operations.');
+  space(0.5);
+  drawText('If payment is not made within two months of notice, the member may be expelled. Amounts already paid toward shares may be forfeited and transferred to the Reserve Fund.', { size:9 });
+  drawRule();
+
+  // RULE 19
+  drawHeading('Rule 19 – Restriction on Extension of Time', 2);
+  drawText('Without prior approval of the General Body, the Managing Committee shall not extend the period prescribed under Rule 18. Any member who has defaulted and not cleared dues shall not be eligible for re-election to the Managing Committee.', { size:9 });
+  drawRule();
+
+  // RULE 20
+  drawHeading('Rule 20 – Share Certificate', 2);
+  drawText('Every member shall be entitled to receive a share certificate bearing the official seal of the society and particulars of shares held. If the certificate is lost, destroyed, or damaged, a duplicate shall be issued on payment of ₹100 as replacement fee.', { size:9 });
+  drawRule();
+
+  // RULE 21
+  drawHeading('Rule 21 – Transfer and Refund of Shares', 2);
+  drawAlpha('a', 'No member shall transfer shares unless: (1) he has held them for at least one year, and (2) the transferee is approved by the Managing Committee.');
+  drawAlpha('b', 'Upon termination of membership, refund of share capital shall be made according to Bihar Cooperative Societies Act, 1935, Section 24, and relevant rules thereunder.');
+  drawRule();
+
+  // RULE 22
+  drawHeading('Rule 22 – Liability', 2);
+  drawAlpha('a', 'The liability of each member for debts of the society shall be limited to five (5) times the nominal value of shares held by him.');
+  drawAlpha('b', 'Former members and estates of deceased members shall remain liable for debts incurred before cessation of membership or death, as provided under law.');
+  drawAlpha('c', 'The above limitation of liability shall be applied subject to provisions relating to winding up of the society.');
+  drawRule();
+
+  // GENERAL BODY
+  drawHeading('GENERAL BODY', 1);
+
+  drawHeading('Rule 23 – Supreme Authority and General Body', 2);
+  drawText('The supreme authority of the society shall vest in the General Body of members.', { size:9, bold:true });
+  space(0.5);
+  drawText('The General Body shall be of three types:', { size:9 });
+  drawAlpha('a', 'Annual General Meeting (AGM)');
+  drawAlpha('b', 'Extraordinary General Meeting');
+  drawAlpha('c', 'Special General Meeting');
+  space(1);
+  drawHeading('Annual General Meeting (AGM)', 3);
+  drawText('The Board shall convene the Annual General Meeting within six months after the close of each financial year. The AGM shall discuss and decide upon the following:', { size:9 });
+  const agmItems = [
+    'Annual statement of accounts prepared by the Board.',
+    'Annual Report submitted by the Board.',
+    'Appointment and removal of statutory auditors and internal auditors.',
+    'Audit reports and audited financial statements.',
+    'Audit compliance reports and special audit reports.',
+    'Inquiry reports and action taken thereon.',
+    'Disposal of net surplus profits.',
+    'Review of operational losses, if any.',
+    'Approval of long-term development plans and annual operating plans.',
+    'Approval of the annual budget.',
+    'Creation of specific reserve funds and other funds.',
+    'Review of actual utilization of reserve funds.',
+    'Report on membership in other cooperative institutions.',
+    'Appeals of persons whose membership was rejected or terminated.',
+    'Payment of remuneration to Directors, Auditors, or Internal Auditors.',
+    'Membership in any Union or Federation.',
+    'Amendments to the bye-laws.',
+    'Approval of Code of Conduct for Directors and Office Bearers.',
+    'Dissolution of the cooperative society.',
+  ];
+  agmItems.forEach((item, i) => drawNumbered(i+1, item, { size:9 }));
+  space(1);
+  drawHeading('Extraordinary General Meeting', 3);
+  drawText('May be convened at any time by the Managing Committee, or within one month of receipt of a written requisition signed by at least one-fifth (1/5) of the total members.', { size:9 });
+  space(1);
+  drawHeading('Special General Meeting', 3);
+  drawText('A Special General Meeting may be called upon written orders of the Registrar or any authorized officer. The meeting shall be held at the place and time specified in the order.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 24 – Quorum', 2);
+  drawText('For any General Body Meeting, the quorum shall be one-fifth (1/5) of the total membership.', { size:9, bold:true });
+  space(0.5);
+  drawText('If quorum is not present:', { size:9 });
+  drawAlpha('a', 'In the case of a Special General Meeting: the meeting shall stand dissolved.');
+  drawAlpha('b', 'In the case of any other General Meeting: the Chairman may adjourn the meeting by not less than 7 days and not more than 15 days. Business agenda remains unchanged.');
+  drawText('If quorum is still not present in the adjourned meeting, resolutions may be passed by three-fourths (3/4) of the members present.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 25 – Voting Rights', 2);
+  drawBullet('Each member shall have one vote only.', { size:9 });
+  drawBullet('No member shall vote on behalf of another.', { size:9 });
+  drawBullet('In the event of equality of votes, the Chairman shall have a casting (deciding) vote.', { size:9 });
+  drawBullet('All matters shall be decided by majority vote.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 26 – Notice of General Meetings', 2);
+  drawText('At least 15 clear days\' notice shall be given for every General Body Meeting. The notice shall clearly mention date, time, venue, and agenda.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 24(a) – Minutes of General Meetings', 2);
+  drawText('The society shall maintain a Minutes Book recording proceedings of every General Body Meeting, including names of members present, resolutions passed, and voting details. The minutes shall bear the signature of the Chairman.', { size:9 });
+  drawRule();
+
+  // MANAGING COMMITTEE
+  drawHeading('MANAGING COMMITTEE', 1);
+
+  drawHeading('Rule 25(a) – Managing Committee', 2);
+  drawText('The management of the affairs of the society shall remain vested in the Managing Committee, subject to directions of the General Body.', { size:9 });
+  drawText('Tenure of the Managing Committee: Five (5) Years.', { size:9, bold:true, color:navy });
+  drawRule();
+
+  drawHeading('Rule 26 – Constitution of the Managing Committee', 2);
+  drawText('The Managing Committee shall consist of 13 members including:', { size:9 });
+  drawBullet('President (Chairperson)', { size:9 });
+  drawBullet('Vice-President (Vice Chairperson)', { size:9 });
+  drawBullet('Secretary', { size:9 });
+  drawBullet('10 other elected members', { size:9 });
+  drawText('The Manager appointed by the Managing Committee shall be an ex-officio member.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 27 – Election of the Managing Committee', 2);
+  drawText('Election of President, Vice-President, Secretary, and all other committee members shall be conducted according to the Bihar State Election Authority Act, 2008 and rules framed thereunder.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 28 – Meetings of the Managing Committee', 2);
+  drawText('Meetings may be held whenever necessary. At least one meeting must be held every three months. Quorum: Seven (7) members.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 29 – Chairmanship of Meetings', 2);
+  drawText('The President shall preside over meetings. In his absence, the Vice-President shall preside. If both are absent, another member elected by those present shall preside.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 30 – Decision-Making', 2);
+  drawText('All matters shall be decided by majority vote. Where votes are equal, the Chairman shall have a deciding vote. No member shall vote on any matter in which he has a personal interest.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 31 – Powers and Duties of the Managing Committee', 2);
+  drawText('The Managing Committee shall:', { size:9 });
+  const committeeItems = [
+    'Consider applications for membership and purchase of shares.',
+    'Consider cases involving defaulting members and expulsion.',
+    'Consider complaints made against members.',
+    'Refund share capital of former members according to the Act, Rules, and Bye-laws.',
+    'Prepare and periodically verify statements showing financial status of members.',
+    'Determine the maximum loan limits that may be granted to members.',
+    'Determine area under cultivation, estimated produce, and credit to be granted.',
+    'Collect information regarding vegetable crops and estimate production.',
+    'Arrange grading, purchase, storage, and transportation of vegetables.',
+    'Provide advances against produce according to these bye-laws.',
+    'Arrange purchase or hiring of implements, machinery, fertilizers, seeds, and inputs.',
+    'Arrange efficient marketing of vegetable produce and establish trade information systems.',
+    'Fix commission rates and other charges, subject to approval of the General Body.',
+    'Control receipt, custody, and expenditure of all cash, stores, stocks, and property.',
+    'Receive loan applications and sanction loans according to genuine requirements.',
+    'Fix schedule and method for recovery of loans advanced to members.',
+    'Institute, defend, compromise, continue, or withdraw legal proceedings on behalf of the society.',
+    'Appoint, suspend, punish, or dismiss paid employees of the society.',
+    'Consider inspection reports and audit notes from Cooperative Department, banks, and federations.',
+    'Fix the maximum cash balance that may be retained.',
+    'Verify and reconcile cash balances held by officers.',
+    'Frame business regulations and operational rules.',
+    'Perform all acts necessary for efficient conduct of the society\'s business.',
+  ];
+  committeeItems.forEach((item, i) => drawNumbered(i+1, item, { size:9 }));
+  drawRule();
+
+  drawHeading('Rule 32 – Responsibility of the Managing Committee', 2);
+  drawText('In carrying out affairs of the society, the Managing Committee shall act with prudence, care, and diligence as an ordinary businessman would exercise. If any loss is caused due to violation of the Act, Rules, or Bye-laws, the Committee shall be responsible.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 33 – Proceedings of Committee Meetings', 2);
+  drawText('A Proceedings Book shall be maintained. The Secretary shall record all proceedings including names of members present, resolutions adopted, voting details, and dissenting opinions on financial matters.', { size:9 });
+  drawRule();
+
+  // OFFICE BEARERS
+  drawHeading('OFFICE BEARERS', 1);
+
+  drawHeading('Rule 34 – Duties of the President (Chairperson)', 2);
+  drawText('The President shall preside over General Body Meetings, Managing Committee Meetings, and Sub-Committee Meetings. He shall supervise the affairs of the society and perform duties assigned by the Managing Committee.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 35 – Duties of the Vice-President (Vice Chairperson)', 2);
+  drawText('In the absence of the President, the Vice-President shall preside over meetings, exercise powers of the President, and perform duties assigned by the Managing Committee.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 36 – Duties of the Secretary', 2);
+  const secDuties = [
+    'Issue notices for General Body Meetings and Managing Committee Meetings.',
+    'Record proceedings in the Minutes Book.',
+    'Prepare statements showing outstanding dues and take action for their recovery.',
+    'Maintain all books, registers, records, and correspondence in proper condition.',
+    'Prepare annual statements, reports, budgets, and other required documents.',
+    'Maintain accurate accounts and ensure all transactions are correctly recorded.',
+    'Receive cash on behalf of the society and issue proper receipts.',
+    'Deposit society funds in approved banks and maintain records thereof.',
+    'Produce all books, records, and accounts whenever required by the Committee, Registrar, or Auditors.',
+    'Perform all duties assigned by the Managing Committee from time to time.',
+  ];
+  secDuties.forEach((d, i) => drawNumbered(i+1, d, { size:9 }));
+  drawRule();
+
+  drawHeading('Rule 37 – Manager', 2);
+  drawText('The society may appoint a full-time paid Manager. The Manager shall work under the supervision of the Managing Committee, carry out day-to-day administration, implement decisions of the General Body and Committee, and maintain proper supervision over employees. The Managing Committee has authority to appoint, suspend, or remove the Manager.', { size:9 });
+  drawRule();
+
+  // LOAN OPERATIONS
+  drawHeading('LOAN OPERATIONS', 1);
+
+  drawHeading('Rule 38 – Grant of Loans', 2);
+  drawText('The society may grant loans to members for vegetable cultivation, purchase of seeds, fertilizers, and agricultural implements, storage and marketing of produce, and other approved purposes. Loans shall be granted only after proper scrutiny, assessment of repayment capacity, and verification of purpose.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 39 – Utilization of Loans', 2);
+  drawText('Every borrower shall utilize the loan only for the sanctioned purpose. The Managing Committee may inspect utilization at any time. If a loan is misused, the entire amount may be recalled immediately and further loans may be denied. Loans shall be given only to actual members of the family engaged in vegetable cultivation.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 40 – Purpose of Loan', 2);
+  drawText('The application for a loan shall clearly and accurately state the purpose for which the loan is being taken.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 41 – Repayment of Loans', 2);
+  drawText('The repayment schedule shall be fixed at the time of sanction, taking into account the purpose of the loan. Borrowers shall repay the principal amount and interest within the stipulated period.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 42 – Interest on Loans', 2);
+  drawText('Interest on member loans shall be charged at rates determined by the General Body. The interest account shall be reviewed annually.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 43 – Penal Interest and Extension', 2);
+  drawText('The Managing Committee may, in special circumstances and with consent of the guarantors, extend the repayment period. The General Body may approve penal interest on overdue instalments, provided the total interest rate (including penal) does not exceed 24% per annum.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 45 – Departure of Member with Outstanding Loan', 2);
+  drawText('If a member with an outstanding loan leaves or is expelled from the society, the entire outstanding amount shall become due and payable immediately regardless of any remaining repayment schedule.', { size:9 });
+  drawRule();
+
+  // SALE OF VEGETABLES
+  drawHeading('SALE OF VEGETABLE PRODUCE', 1);
+
+  drawHeading('Rule 46 – Methods of Marketing', 2);
+  drawText('The Managing Committee may arrange for sale of members\' vegetable produce through the following systems:', { size:9 });
+  space(1);
+  drawHeading('(a) Outright Purchase System', 3);
+  drawText('The society shall purchase vegetables directly from members at villages. Ownership shall pass to the society. Subsequent sale shall be at the society\'s risk. Individual members shall not be responsible for profit or loss under this system.', { size:9 });
+  space(0.5);
+  drawHeading('(b) Commission Sale System', 3);
+  drawText('Members shall deposit vegetables in society or cooperative godowns. The society shall sell on behalf of members and recover commission, transportation, storage charges, and other approved expenses. The balance shall be paid to the member.', { size:9 });
+  space(0.5);
+  drawHeading('(c) Pledging System', 3);
+  drawText('Members shall deposit vegetables as security in approved warehouses. The society may grant advances up to 75% of the assessed value (or such limit as fixed by the General Body). Advances shall ordinarily be repaid within 6 months. If the market price falls by 10% or more below the pledged value, the society may recall the loan or demand additional security.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 47 – Statement Preparation', 2);
+  drawText('Upon receipt of any crop for sale, the society shall prepare a statement showing the area under cultivation, estimated produce, and actual goods received for marketing from each member.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 48 – Deductions from Sale Proceeds', 2);
+  drawText('From the amount received from sale of a member\'s vegetables, the society shall deduct all dues that are rightfully recoverable from the member before paying the balance.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 49 – Purchase and Sale', 2);
+  drawText('All sales shall be in cash only. Sales may also be made to non-members.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 50 – Complaints', 2);
+  drawText('All complaints relating to quality, pricing, or conduct of society officers against members shall be presented before the Managing Committee.', { size:9 });
+  drawRule();
+
+  // ACCOUNTS AND RECORDS
+  drawHeading('ACCOUNTS AND RECORDS', 1);
+
+  drawHeading('Rule 51 – Registers and Books', 2);
+  drawText('The society shall maintain the following records:', { size:9 });
+  const books = ['Register of Share-buying Members','Minutes Book','Cash Book','Loan Register','Deposit Register','Members\' Status Register','Any other registers prescribed by the Registrar from time to time'];
+  books.forEach(b => drawBullet(b, { size:9 }));
+  drawRule();
+
+  drawHeading('Rule 52 – Availability of Records', 2);
+  drawText('All records of the society shall be available for inspection by members at all times.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 53 – Authorisation for Financial Documents', 2);
+  drawText('All documents bearing charges and obligations on the society shall be signed by the President and Secretary, or by three members of the Managing Committee. The President and Secretary, or three Managing Committee members, shall be authorized to sign cheques and pay orders.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 54 – Official Seal', 2);
+  drawText('The society shall have an official seal, to remain under the charge of the Secretary/Manager.', { size:9 });
+  drawRule();
+
+  // DISTRIBUTION OF PROFITS
+  drawHeading('DISTRIBUTION OF PROFITS AND RESERVES', 1);
+
+  drawHeading('Rule 55 – Distribution of Net Profit', 2);
+  drawText('The financial year shall end on 31st March annually. Net profit as certified by audit shall be distributed as follows:', { size:9 });
+  drawAlpha('a', 'Not less than 35% of net profit shall be transferred to the Reserve Fund.');
+  drawAlpha('b', 'Not less than 10% shall be transferred to the Cooperative Education and Development Fund.');
+  drawAlpha('c', 'Dividend not exceeding 9¼% (nine and a quarter percent) per annum shall be paid on paid-up share capital.');
+  drawAlpha('d', 'Rebate on interest, goods purchased, and sold through the society at rates fixed by the General Body.');
+  drawAlpha('e', 'Bonus to employees not exceeding one month\'s salary.');
+  drawAlpha('f', 'Remuneration to Secretary or other office bearers approved by the General Body.');
+  drawAlpha('g', 'Remaining balance to be carried forward or utilized as determined by the General Body.');
+  drawRule();
+
+  drawHeading('Rule 56 – Reserve Fund', 2);
+  drawText('The Reserve Fund shall be constituted from:', { size:9 });
+  drawAlpha('a', 'At least 35% of net profit transferred annually under the Act.');
+  drawAlpha('b', 'Amounts from profits or other sources transferred to the fund.');
+  drawAlpha('c', 'Initial expenses deducted from admission fees within 3 years of registration.');
+  drawAlpha('d', 'Value of forfeited shares.');
+  space(0.5);
+  drawText('The Reserve Fund may be used for:', { size:9 });
+  drawAlpha('a', 'Making up any deficiency caused by an unforeseen contingency.');
+  drawAlpha('b', 'Purposes whose completion cannot otherwise be achieved.');
+  drawAlpha('c', 'As security for borrowings of the society.');
+  space(0.5);
+  drawText('Upon dissolution, the Reserve Fund shall be applied according to the decision of a Special General Meeting and approved by the Registrar.', { size:9 });
+  drawRule();
+
+  // AUDIT
+  drawHeading('AUDIT, INSPECTION, AND ANNUAL RETURNS', 1);
+
+  drawHeading('Rule 57 – Audit', 2);
+  drawNumbered(1, 'The society shall get its accounts audited every financial year within six months after the close of the financial year.', { size:9 });
+  drawNumbered(2, 'Audit shall be conducted by the Cooperative Audit Wing or a Chartered Accountant firm authorized by the Registrar.', { size:9 });
+  drawNumbered(3, 'Audit of accounts shall be completed within six months after the close of the relevant financial year.', { size:9 });
+  drawNumbered(4, 'The audit fee shall be determined by the Registrar. If audited by the Registrar\'s office, the fee shall be paid by the cooperative society.', { size:9 });
+  drawNumbered(5, 'The General Body may remove an auditor by resolution passed by majority of members present.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 58 – Annual Returns', 2);
+  drawText('Every year, within the period prescribed by law, the society shall submit annual returns to the Registrar containing:', { size:9 });
+  const returns = ['Annual Report of activities.','Audited Statement of Accounts.','Plan for disposal of audit observations by the Registrar.','List of amendments to bye-laws, if any.','Date of next General Body meeting and election announcement, if due.','Any other information required by the Registrar.'];
+  returns.forEach(r => drawBullet(r, { size:9 }));
+  drawRule();
+
+  drawHeading('Rule 59 – Amendment of Bye-Laws', 2);
+  drawText('These bye-laws may not be amended unless:', { size:9 });
+  drawAlpha('a', 'Members are given 15 days\' prior notice before the General Body meeting.');
+  drawAlpha('b', 'The resolution for amendment is passed by two-thirds (2/3) majority of members present and voting in the General Body.');
+  drawAlpha('c', 'The amendment is approved by the Registrar, Cooperative Societies.');
+  drawRule();
+
+  // DISPUTE RESOLUTION
+  drawHeading('Rule 60 – Panchayat / Dispute Resolution', 2);
+  drawText('Any dispute that cannot be resolved by the Managing Committee or General Body shall be referred to the Registrar, Cooperative Societies, for resolution under the provisions of the Bihar Cooperative Societies Act.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 61 – Dissolution', 2);
+  drawText('The society may be dissolved by a resolution of an Extraordinary General Meeting convened for this purpose, passed by three-fourths (3/4) of members present and voting, and approved by the Registrar.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 62 – Interpretation', 2);
+  drawText('If any doubt arises regarding interpretation of any provision of these bye-laws or the Act, the Managing Committee shall present the matter to the Registrar, whose decision shall be final.', { size:9 });
+  drawRule();
+
+  drawHeading('Rule 63 – Residual Provision', 2);
+  drawText('All matters not specifically covered in these bye-laws shall be governed by the Bihar Cooperative Societies Act (Act 6 of 1935) and the rules framed thereunder.', { size:9 });
+  drawRule();
+
+  // FINAL PAGE
+  newPage();
+  drawHeading('CERTIFICATION', 1);
+  drawText('The foregoing bye-laws were adopted by the promoters of the society and approved in the formation meeting held for establishment of the Patna Sadar Block Primary Vegetables Growers Cooperative Society Limited.', { size:9 });
+  space(2);
+  drawText('Registration Number: 26/HQR/2018', { size:9.5, bold:true, color:navy });
+  drawText('Registration Authority: Registrar, Cooperative Societies, Bihar', { size:9 });
+  drawText('Act: Bihar Cooperative Societies Act, 1935 (Act 6 of 1935), Section 6', { size:9 });
+  space(2);
+  drawRule(gold);
+  space(2);
+
+  drawHeading('KEY PARAMETERS AT A GLANCE', 2);
+  const params = [
+    ['Share Capital', '₹3,00,000 (Three Lakh)'],
+    ['Share Value', '₹100 per share'],
+    ['Managing Committee', '13 Members'],
+    ['Committee Tenure', '5 Years'],
+    ['Min. Committee Meeting', 'Once every 3 months (Quorum: 7 members)'],
+    ['General Body Quorum', '1/5th of total membership'],
+    ['Voting Rights', 'One vote per member'],
+    ['Borrowing Limit', '10x (paid-up capital + reserve fund)'],
+    ['Reserve Fund', 'Minimum 35% of net annual profit'],
+    ['Dividend Limit', 'Maximum 9¼% per annum on paid-up share'],
+    ['Cooperative Education Fund', 'Minimum 10% of net annual profit'],
+    ['Member Liability', 'Limited to 5x nominal share value'],
+    ['Audit Period', 'Within 6 months of close of financial year'],
+    ['Annual Returns', 'Within prescribed period to Registrar'],
+    ['Bylaw Amendment', '2/3 majority + Registrar approval required'],
+    ['Dissolution', '3/4 majority + Registrar approval required'],
+    ['Financial Year', '1st April to 31st March'],
+    ['Area of Operation', 'Patna Sadar Block only'],
+  ];
+
+  for (const [label, value] of params) {
+    checkY(18);
+    currentPage.drawRectangle({ x:ML, y:y-3, width:CW, height:16, color:light });
+    currentPage.drawText(label+':', { x:ML+6, y, size:8.5, font:fontBold, color:navy });
+    const lw = fontBold.widthOfTextAtSize(label+':', 8.5) + 10;
+    currentPage.drawText(value, { x:ML+lw+2, y, size:8.5, font, color:black });
+    y -= 17;
+  }
+
+  space(2);
+  drawRule(gold);
+  y -= 8;
+  drawText('This document serves as the primary legal and governance reference for the society. The Bylaw Search system in the PVCS DMS uses this document for all governance queries.', { size:8, color:gray });
+
+  // Save and download
+  const pdfBytes = await pdfDoc.save();
+  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'PVCS-Model-Bylaws-Patna-Sadar.pdf';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+
+  statusEl.className = 'status success';
+  statusEl.innerHTML = `✅ PDF generated successfully! <strong>${pageNum} pages</strong>.<br/>
+    File saved as: <strong>PVCS-Model-Bylaws-Patna-Sadar.pdf</strong><br/><br/>
+    <strong>Next step:</strong> Open the PVCS DMS app → Go to <strong>Bylaw Search</strong> → Upload this PDF to enable full-text search.`;
+}
+</script>
+</body>
+</html>
