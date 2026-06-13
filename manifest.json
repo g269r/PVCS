@@ -1,0 +1,43 @@
+{
+  "name": "PVCS Document Management System",
+  "short_name": "PVCS DMS",
+  "description": "Patna Sadar Block Primary Vegetables Growers Cooperative Society – Correspondence & Document Management System",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a3a5c",
+  "theme_color": "#1a3a5c",
+  "orientation": "any",
+  "scope": "./",
+  "lang": "en-IN",
+  "categories": ["productivity", "business"],
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Create Letter",
+      "short_name": "New Letter",
+      "description": "Create a new letter",
+      "url": "./index.html#create-letter",
+      "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Letter Archive",
+      "short_name": "Archive",
+      "description": "View letter archive",
+      "url": "./index.html#archive",
+      "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
