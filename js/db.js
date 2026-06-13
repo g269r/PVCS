@@ -3,14 +3,14 @@
    ============================================================ */
 
 const DB_NAME = 'PVCS_DMS';
-const DB_VERSION = 1;
+const DB_VERSION = 2;            // bumped: added recipient master stores
 
 const STORES = {
-  LETTERS: 'letters',
+  LETTERS:      'letters',
   BYLAWS_PAGES: 'bylaws_pages',
-  COUNTERS: 'counters',
-  SETTINGS: 'settings',
-  RECIPIENTS: 'recipients',
+  COUNTERS:     'counters',
+  SETTINGS:     'settings',
+  RECIPIENTS:   'recipients',   // legacy flat list (kept for backup compat)
 };
 
 let db = null;
@@ -26,13 +26,17 @@ function openDB() {
       // Letters store
       if (!d.objectStoreNames.contains(STORES.LETTERS)) {
         const ls = d.createObjectStore(STORES.LETTERS, { keyPath: 'did' });
-        ls.createIndex('refNumber', 'refNumber', { unique: true });
-        ls.createIndex('date', 'date', { unique: false });
-        ls.createIndex('sender', 'sender', { unique: false });
-        ls.createIndex('recipient', 'recipient', { unique: false });
-        ls.createIndex('letterType', 'letterType', { unique: false });
-        ls.createIndex('priority', 'priority', { unique: false });
-        ls.createIndex('yearMonth', 'yearMonth', { unique: false });
+        ls.createIndex('refNumber',    'refNumber',    { unique: true  });
+        ls.createIndex('date',         'date',         { unique: false });
+        ls.createIndex('sender',       'sender',       { unique: false });
+        ls.createIndex('recipient',    'recipient',    { unique: false });
+        ls.createIndex('letterType',   'letterType',   { unique: false });
+        ls.createIndex('priority',     'priority',     { unique: false });
+        ls.createIndex('yearMonth',    'yearMonth',    { unique: false });
+        // new structured recipient fields
+        ls.createIndex('recipientDesignation',  'recipientDesignation',  { unique: false });
+        ls.createIndex('recipientOrganization', 'recipientOrganization', { unique: false });
+        ls.createIndex('recipientLocation',     'recipientLocation',     { unique: false });
       }
 
       // Bylaws pages store
@@ -275,19 +279,19 @@ const Recipients = {
 const Backup = {
   async exportAll() {
     await openDB();
-    const letters = await Letters.getAll();
-    const bylawsPages = await Bylaws.getAll();
-    const counters = await dbGetAll(STORES.COUNTERS);
-    const settings = await dbGetAll(STORES.SETTINGS);
-    const recipients = await dbGetAll(STORES.RECIPIENTS);
+    const letters      = await Letters.getAll();
+    const bylawsPages  = await Bylaws.getAll();
+    const counters     = await dbGetAll(STORES.COUNTERS);
+    const settings     = await dbGetAll(STORES.SETTINGS);
+    const recipients   = await dbGetAll(STORES.RECIPIENTS);
     return {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      society: 'PVCS-PS',
+      version:     2,
+      exportedAt:  new Date().toISOString(),
+      society:     'PVCS-PS',
       letters,
       bylawsPages,
       counters,
-      settings,
+      settings,      // includes rec_designations, rec_organizations, rec_locations keys
       recipients,
     };
   },
@@ -314,7 +318,7 @@ const Backup = {
       await dbClear(STORES.RECIPIENTS);
       for (const r of data.recipients) await dbPut(STORES.RECIPIENTS, r);
     }
-    // Reset in-memory db
+    // Reset in-memory db so next openDB() re-reads fresh
     db = null;
   },
 };
