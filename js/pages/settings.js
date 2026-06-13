@@ -6,11 +6,16 @@
 async function renderSettingsPage() {
   const container = document.getElementById('page-settings');
 
-  const [defaultSender, defaultPriority, perPage, letterSuffix] = await Promise.all([
+  const [defaultSender, defaultPriority, perPage, letterSuffix,
+         aiModel, aiTemperature, aiMaxTokens, aiDraftStyle] = await Promise.all([
     Settings.get('defaultSender')  .then(v => v || 'Secretary'),
     Settings.get('defaultPriority').then(v => v || 'Normal'),
     Settings.get('perPage')        .then(v => v || '15'),
     Settings.get('letterSuffix')   .then(v => v || 'PS'),
+    Settings.get('aiModel')        .then(v => v || WEBLLM_MODELS.find(m=>m.default).id),
+    Settings.get('aiTemperature')  .then(v => v || '0.4'),
+    Settings.get('aiMaxTokens')    .then(v => v || '800'),
+    Settings.get('aiDraftStyle')   .then(v => v || 'Government Official'),
   ]);
 
   container.innerHTML = `
@@ -114,6 +119,96 @@ async function renderSettingsPage() {
               </tr>`).join('')}
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- ── AI Settings ───────────────────────────────────── -->
+    <div class="card" id="ai-settings-card">
+      <div class="card-header">
+        <div class="card-title">🤖 AI Drafting Settings (WebLLM)</div>
+        <div id="ai-settings-status" class="badge badge-normal">Checking…</div>
+      </div>
+
+      <div style="background:#f0f7ff;border-radius:6px;padding:12px 16px;margin-bottom:16px;font-size:0.85rem;line-height:1.6;border-left:4px solid var(--primary)">
+        <strong>How it works:</strong> WebLLM runs an AI model <em>entirely inside your browser</em> using WebGPU.
+        No internet connection is needed after the model is downloaded once. The model is cached in your browser permanently.
+        No data leaves your device.
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="form-group">
+          <label class="form-label">Preferred AI Model</label>
+          <select class="form-control" id="s-ai-model">
+            ${WEBLLM_MODELS.map(m =>
+              `<option value="${m.id}" ${aiModel===m.id?'selected':''}>
+                ${m.label} — ${m.size}
+              </option>`).join('')}
+          </select>
+          <div class="form-hint">Model is downloaded once and cached in the browser</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Drafting Temperature</label>
+          <div style="display:flex;align-items:center;gap:10px">
+            <input type="range" id="s-ai-temperature" min="0.1" max="1.0" step="0.05"
+              value="${aiTemperature}"
+              style="flex:1" oninput="document.getElementById('s-ai-temp-val').textContent=this.value" />
+            <span id="s-ai-temp-val" style="min-width:32px;font-weight:700;color:var(--primary)">${aiTemperature}</span>
+          </div>
+          <div class="form-hint">Lower = more formal/consistent; Higher = more varied</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Max Draft Length (tokens)</label>
+          <select class="form-control" id="s-ai-max-tokens">
+            ${[400,600,800,1000,1200].map(n =>
+              `<option value="${n}" ${aiMaxTokens==n?'selected':''}>${n} tokens (~${Math.round(n*0.75)} words)</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Default Draft Style</label>
+          <select class="form-control" id="s-ai-draft-style">
+            ${['Government Official','Cooperative Society','Legal','Business Formal','Strong Representation','Reminder / Follow-Up'].map(s =>
+              `<option value="${s}" ${aiDraftStyle===s?'selected':''}>${s}</option>`
+            ).join('')}
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-primary" id="btn-save-ai-settings">Save AI Settings</button>
+        <button class="btn btn-outline" id="btn-test-load-ai">⚡ Load Model Now</button>
+        <button class="btn btn-outline btn-sm" id="btn-unload-ai-settings" style="display:none">⏹ Unload Model</button>
+        <span id="ai-settings-runtime-status" style="font-size:0.82rem;color:var(--text-muted)"></span>
+      </div>
+
+      <!-- Model info table -->
+      <div style="margin-top:16px">
+        <div class="form-label" style="margin-bottom:8px">Available Models</div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>Model</th><th>Size</th><th>Speed</th><th>Quality</th></tr>
+            </thead>
+            <tbody>
+              ${WEBLLM_MODELS.map(m => `
+                <tr>
+                  <td>
+                    <div style="font-weight:600;font-size:0.85rem">${m.label.split('(')[0].trim()}</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted)">${m.id}</div>
+                  </td>
+                  <td><span class="badge badge-normal">${m.size}</span></td>
+                  <td>${m.speed}</td>
+                  <td>${m.quality}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;padding:10px 14px;background:#fff8e1;border-radius:6px;font-size:0.82rem;color:#856404">
+        ⚠️ <strong>Requirements:</strong> WebGPU-capable browser (Chrome 113+, Edge 113+, or Firefox Nightly).
+        Safari and older browsers fall back to template mode automatically.
+        First download requires internet; subsequent use is fully offline.
       </div>
     </div>
 
