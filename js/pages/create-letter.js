@@ -78,6 +78,7 @@ async function renderCreateLetter(prefill) {
         </div>
         <button class="btn btn-sm btn-primary" id="btn-load-ai">⚡ Load AI Model</button>
         <button class="btn btn-sm btn-outline" id="btn-unload-ai" style="display:none">⏹ Unload</button>
+        <button class="btn btn-sm btn-outline" onclick="pvcsAIDiag().then(()=>showToast('Diagnostics printed to browser console (F12)',\'info\',4000))" title="Run diagnostics and print to console">🔍 Diagnose</button>
       </div>
     </div>
 
@@ -433,6 +434,9 @@ async function handleLoadAI() {
   if (btn) btn.disabled = false;
   refreshAIBanner();
 }
+
+// Make it global so the error modal retry button can call it
+window.handleLoadAI = handleLoadAI;
 
 // ============================================================
 // Draft generation
