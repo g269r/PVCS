@@ -474,46 +474,59 @@ function buildHindiPrompt(params, englishDraft) {
     .filter(Boolean).join(', ');
 
   const systemPrompt =
-`आप एक भारतीय सहकारी समिति के विशेषज्ञ हिंदी पत्र प्रारूपण अधिकारी हैं।
-आप सरकारी विभागों, सहकारी महासंघों, रजिस्ट्रार कार्यालयों और जिला प्रशासन के लिए पेशेवर हिंदी पत्र तैयार करते हैं।
-नियम:
-- शुद्ध औपचारिक हिंदी सरकारी पत्र-शैली में लिखें।
-- सम्मानजनक एवं विनम्र भाषा का प्रयोग करें।
-- तथ्यों को हूबहू न दोहराएं — उन्हें पेशेवर पत्र भाषा में रूपांतरित करें।
-- अनौपचारिक, बोलचाल की भाषा से बचें।
-- समिति का नाम: पटना सदर प्रखंड प्राथमिक सब्जी उत्पादक सहकारी समिति लिमिटेड
-- पंजीकरण संख्या: 26/HQR/2018`;
+`आप एक भारतीय सहकारी समिति के आधिकारिक हिंदी प्रारूप अधिकारी हैं।
 
-  const sourceContent = englishDraft
-    ? `नीचे दिए गए अंग्रेजी प्रारूप का हिंदी में अनुवाद एवं रूपांतरण करें:\n${englishDraft.slice(0, 1000)}`
-    : `नीचे दिए गए तथ्यों एवं निर्देशों के आधार पर हिंदी पत्र लिखें:\n${facts}`;
+आपका दायित्व है कि आप सरकारी विभागों, सहकारी महासंघों, रजिस्ट्रार कार्यालयों, जिला अधिकारियों, बैंकों और सार्वजनिक संस्थानों को संबोधित पेशेवर हिंदी पत्र तैयार करें।
+
+अनिवार्य नियम:
+- चैटबॉट की भाषा में कभी न लिखें।
+- निम्नलिखित जैसे वाक्यांशों का उपयोग न करें: "मैं आपको सूचित करना चाहता हूँ", "उम्मीद है आप ठीक होंगे", "कृपया हमें बताएं"।
+- विशुद्ध औपचारिक सरकारी हिंदी प्रशासनिक भाषा का प्रयोग करें।
+- पसंदीदा वाक्यांश: "सविनय निवेदन है कि...", "उपरोक्त विषयक अवगत कराना है कि...", "अतः अनुरोध है कि...", "समुचित कार्रवाई करने की कृपा करें।", "विषयान्तर्गत आवश्यक आदेश देने का कष्ट करें।", "मामले को उचित संज्ञान में लेकर आवश्यक कार्यवाही की जाए।"
+- केवल उपयोगकर्ता द्वारा दिए गए तथ्यों का उपयोग करें। कोई नया तथ्य, नाम, राशि या तिथि न जोड़ें।
+- भावनात्मक, विपणन या बोलचाल की भाषा से बचें।
+- पत्र को इस प्रकार लिखें जैसे यह किसी आधिकारिक अभिलेख का हिस्सा बनेगा।
+- यह एक स्वतंत्र हिंदी पत्र होना चाहिए — अंग्रेजी का शब्द-दर-शब्द अनुवाद नहीं।
+- हस्ताक्षर खंड में समिति का पता या पंजीकरण संख्या न दोहराएं।
+- केवल पत्र का मुख्य भाग प्रस्तुत करें। कोई टिप्पणी, व्याख्या या शीर्षक नहीं।
+- समिति: पटना सदर प्रखंड प्राथमिक सब्जी उत्पादक सहकारी समिति लिमिटेड
+- पंजीकरण: 26/HQR/2018 | बिहार सहकारी समिति अधिनियम, 1935`;
+
+  // If English draft exists, use it as semantic source (not word-for-word)
+  // If not, work from raw facts
+  const sourceBlock = englishDraft
+    ? `नीचे दिए गए अंग्रेजी पत्र के भाव एवं तथ्यों के आधार पर एक स्वतंत्र हिंदी पत्र प्रारूप तैयार करें। शब्द-दर-शब्द अनुवाद न करें:
+
+${englishDraft.slice(0, 1200)}`
+    : `नीचे दिए गए तथ्यों एवं निर्देशों के आधार पर हिंदी पत्र प्रारूप तैयार करें:
+
+${facts}`;
 
   const userPrompt =
 `${letterType} श्रेणी का एक पूर्ण हिंदी पत्र प्रारूप तैयार करें।
 
 पत्र विवरण:
-- दिनांक: ${letterDate}
-- प्रेषक: ${senderName}, ${senderRole}
-- प्राप्तकर्ता: ${recipientStr}
-- विषय: ${subject}
-- शैली: ${draftStyle}
+दिनांक: ${letterDate}
+प्रेषक: ${senderName}, ${senderRole}
+प्राप्तकर्ता: ${recipientStr}
+विषय: ${subject}
+शैली: ${draftStyle}
 
-${sourceContent}
+${sourceBlock}
 
-निर्देश:
-- केवल पत्र का मुख्य भाग लिखें — "महोदय/महोदया," से आरंभ करें और हस्ताक्षर खंड पर समाप्त करें।
-- लेटरहेड, संदर्भ संख्या और पते की पंक्तियाँ अलग से जोड़ी जाएंगी।
+प्रारूप निर्देश:
+- "महोदय," या "महोदया," से आरंभ करें।
 - 3 से 5 सुव्यवस्थित अनुच्छेद लिखें।
-
-अंत में यह हस्ताक्षर खंड अवश्य लिखें:
+- तथ्यों को औपचारिक प्रशासनिक हिंदी में विस्तारित करें — हूबहू न दोहराएं।
+- लेटरहेड, संदर्भ संख्या और पते की पंक्तियाँ अलग से जोड़ी जाएंगी — उन्हें यहाँ शामिल न करें।
+- अंत में यह हस्ताक्षर खंड लिखें:
 
 भवदीय,
 
 (हस्ताक्षर)
 ____________________________
 ${senderName}
-${senderRole}
-पटना सदर प्रखंड प्राथमिक सब्जी उत्पादक सहकारी समिति लिमिटेड`;
+${senderRole}`;
 
   return { systemPrompt, userPrompt };
 }
@@ -522,35 +535,41 @@ function buildImprovementPrompt(existingDraft, language) {
   const isHindi = language === 'hi';
 
   const systemPrompt = isHindi
-    ? `आप एक वरिष्ठ हिंदी सरकारी पत्र संपादक हैं। दिए गए पत्र प्रारूप को बेहतर बनाएं।`
-    : `You are a senior government correspondence editor. Improve the given letter draft.`;
+    ? `आप एक वरिष्ठ सरकारी हिंदी पत्र संपादक हैं।
+नियम:
+- केवल भाषा, व्याकरण और शैली सुधारें।
+- कोई नया तथ्य न जोड़ें और कोई तथ्य न हटाएं।
+- औपचारिक सरकारी हिंदी बनाए रखें।
+- चैटबॉट वाक्यांशों से बचें।
+- केवल बेहतर प्रारूप प्रस्तुत करें — कोई टिप्पणी नहीं।`
+    : `You are a senior government correspondence editor.
+Rules:
+- Fix grammar, sentence structure, and formal tone only.
+- Do NOT add any new facts. Do NOT remove any existing facts.
+- Eliminate chatbot phrases: "I am writing to inform you", "Hope you are doing well", "Please let us know", "Feel free to", etc.
+- Replace informal phrases with formal administrative equivalents.
+- Output ONLY the improved draft — no commentary, no notes, no explanations.`;
 
   const userPrompt = isHindi
     ? `निम्नलिखित हिंदी पत्र प्रारूप में सुधार करें:
-नियम:
 - व्याकरण एवं विराम चिह्नों को ठीक करें
-- स्पष्टता एवं प्रवाह बढ़ाएं
-- औपचारिकता का स्तर बनाए रखें
-- सभी तथ्य अपरिवर्तित रखें
-- मूल संरचना बनाए रखें
+- औपचारिक सरकारी हिंदी शैली सुनिश्चित करें
+- सभी तथ्य एवं संरचना अपरिवर्तित रखें
+- केवल बेहतर प्रारूप प्रस्तुत करें
 
 मौजूदा प्रारूप:
-${existingDraft}
-
-केवल बेहतर प्रारूप प्रस्तुत करें — कोई टिप्पणी या स्पष्टीकरण नहीं।`
+${existingDraft}`
     : `Improve the following government letter draft.
 
 Rules:
-- Fix grammar, punctuation, and sentence structure
-- Improve clarity and professional tone
-- Preserve ALL facts exactly as stated
-- Keep the same structure and meaning
-- Do NOT add or remove factual content
+- Fix grammar, punctuation, and sentence structure.
+- Replace any chatbot or informal phrases with formal administrative language.
+- Use preferred government phrases: "It is submitted that...", "It is therefore requested that...", "Necessary action may kindly be taken.", "Your favourable consideration is solicited."
+- Preserve ALL facts exactly — do not add or remove any content.
+- Return ONLY the improved draft.
 
 Draft to improve:
-${existingDraft}
-
-Return ONLY the improved draft — no commentary, no explanations.`;
+${existingDraft}`;
 
   return { systemPrompt, userPrompt };
 }
