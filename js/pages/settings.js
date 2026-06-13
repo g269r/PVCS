@@ -123,7 +123,7 @@ async function renderSettingsPage() {
       <div style="font-size:0.88rem;line-height:1.8;color:var(--text-muted)">
         <strong style="color:var(--primary)">PVCS Document Management System</strong> — Version 2.0 | Offline PWA<br/>
         All data is stored locally using IndexedDB. No server. No cloud. Works fully offline.<br/><br/>
-        <strong>Stack:</strong> HTML5 · CSS3 · Vanilla JS · IndexedDB · PDF.js · Fuse.js · Lunr.js · pdf-lib · docx.js · QRCode.js<br/>
+        <strong>Stack:</strong> HTML5 · CSS3 · Vanilla JS · IndexedDB · PDF.js · Fuse.js · Lunr.js · pdf-lib · docx.js · QRCode.js · WebLLM<br/>
         <strong>Hosting:</strong> GitHub Pages (static only)
       </div>
     </div>
