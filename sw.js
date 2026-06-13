@@ -14,6 +14,7 @@ const APP_ASSETS = [
   './css/style.css',
   './js/db.js',
   './js/utils.js',
+  './js/recipients.js',
   './js/refnum.js',
   './js/templates.js',
   './js/pdf-export.js',

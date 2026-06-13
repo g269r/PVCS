@@ -812,3 +812,63 @@ tr:hover td { background: rgba(26,58,92,0.03); }
   z-index: 10;
   margin: 0 -28px -24px;
 }
+
+/* ============================================================
+   Recipient Panel – 3-part structured input
+   ============================================================ */
+
+.recipient-panel { }
+
+.recipient-panel-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.recipient-panel-row .form-group {
+  margin-bottom: 6px;
+}
+
+.rp-ac-wrap { position: relative; }
+
+.rp-preview {
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: #f0f7ff;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--primary);
+}
+
+/* Autocomplete dropdown item hover */
+.ac-item:hover {
+  background: rgba(26, 58, 92, 0.07) !important;
+}
+
+.ac-add:hover {
+  background: rgba(26, 58, 92, 0.12) !important;
+}
+
+/* Recipient Management table in Settings */
+#rec-table-designations td,
+#rec-table-organizations td,
+#rec-table-locations td {
+  vertical-align: middle;
+  padding: 6px 8px;
+}
+
+.rec-tab-panel { min-height: 100px; }
+
+/* Auto-abbreviation badge */
+.abbr-badge {
+  display: inline-block;
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  background: var(--primary);
+  color: #fff;
+  padding: 1px 7px;
+  border-radius: 10px;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
