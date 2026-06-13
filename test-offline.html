@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head><title>PVCS – Offline Test</title>
+<style>body{font-family:Arial;padding:20px;max-width:600px;margin:0 auto} .ok{color:green} .err{color:red} .warn{color:orange}</style>
+</head>
+<body>
+<h2>PVCS System – Pre-flight Check</h2>
+<div id="results"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/7.0.0/fuse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lunr.js/2.3.9/lunr.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script>
+const results = document.getElementById('results');
+function check(label, condition, warn) {
+  const div = document.createElement('div');
+  div.className = condition ? 'ok' : (warn ? 'warn' : 'err');
+  div.textContent = (condition ? '✓ ' : (warn ? '⚠ ' : '✕ ')) + label;
+  results.appendChild(div);
+}
+
+check('IndexedDB available', 'indexedDB' in window);
+check('Service Worker available', 'serviceWorker' in navigator, true);
+check('localStorage available', 'localStorage' in window);
+check('Fuse.js loaded', typeof Fuse !== 'undefined');
+check('Lunr.js loaded', typeof lunr !== 'undefined');
+check('PDFLib loaded', typeof PDFLib !== 'undefined');
+check('Fetch API available', 'fetch' in window);
+check('Blob + URL.createObjectURL', typeof Blob !== 'undefined' && typeof URL !== 'undefined');
+
+// Test IndexedDB
+const req = indexedDB.open('pvcs_test', 1);
+req.onsuccess = () => {
+  check('IndexedDB read/write', true);
+  req.result.close();
+  indexedDB.deleteDatabase('pvcs_test');
+};
+req.onerror = () => check('IndexedDB read/write', false);
+
+setTimeout(() => {
+  const div = document.createElement('div');
+  div.style.marginTop = '20px';
+  div.innerHTML = '<strong>→ <a href="index.html">Open PVCS DMS Application</a></strong>';
+  results.appendChild(div);
+}, 500);
+</script>
+</body>
+</html>
